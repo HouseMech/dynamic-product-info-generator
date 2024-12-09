@@ -14,38 +14,6 @@ openai.api_key = os.getenv("OPENAI_API_KEY", "default-key")
 if openai.api_key == "default-key" or openai.api_key == "":
     raise ValueError('OPENAI_API_KEY is empty!')
 
-# MOCK ENDPOINT: Connect to GPT and have it return product data from a name.
-@app.get("/getMockProductInfo/{item_name}")
-def generate_mock_product(item_name: str):
-    try:
-        # Construct the prompt
-        messages = [
-            {
-                "role": "system",
-                "content": "You are an assistant that generates accurate and detailed product information and returns it in JSON format. Only provide information if you are certain it is accurate. Example: For a product 'XYZ', provide this JSON structure: { 'id': '...', 'name': '...', 'description': '...', 'specifications': 'Data not available' }"
-            },
-            {
-                "role": "user",
-                "content": f"Generate detailed product information for a product named '{item_name}'. Provide placeholder text for missing data instead of fabricating it."
-            }
-        ]
-
-        # Call the ChatCompletion API
-        response = openai.chat.completions.create(
-            model="gpt-4",
-            messages=messages,
-            max_tokens=500,
-            temperature=0.5,
-            logprobs=True,
-            top_logprobs=5
-        )
-
-        # return {"product_name": item_name, "details": product_info}
-        product_info = response.choices[0].message.content.strip()
-
-        return {"product_name": item_name, "details": json.loads(product_info), "response": response}
-    except Exception as e:
-        return {"error": str(e)}
 # MASTER FUNCTION, calls the other functions.
 # After passing in a product name via a search query, first it attempts to search the Amazon store (via webscraping, if I had the time to get access to Amazon's Product Advertising API that would have been a nice avenue to explore as well.)
 # Afterwards, it accesses the product page for the item found, and acquires information from the page such as title, price and product info.
